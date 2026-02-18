@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pomodoro</title>
+  <link rel="stylesheet" href="/src/css/app.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span><span>Pomodoro</span></div>
+    <div class="nav">
+      <button id="btnSettings" type="button">Settings</button>
+      <button id="btnAuth" type="button">Log in</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="stack">
+      <div class="timerCard" id="timerCard">
+        <div class="tabs">
+          <button class="tab active" data-mode="work" type="button">Pomodoro</button>
+          <button class="tab" data-mode="short_break" type="button">Short Break</button>
+          <button class="tab" data-mode="long_break" type="button">Long Break</button>
+        </div>
+
+        <div class="time" id="timeView">25:00</div>
+
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button class="bigBtn" id="btnStartPause" type="button">START</button>
+          <button class="btn" id="btnSkip" type="button" style="padding:14px 18px; font-size:16px; font-weight:950;">SKIP</button>
+        </div>
+
+        <div class="subline">
+          <span id="cycleView">#1</span>
+          <span style="opacity:.88; margin-left:10px;" id="hintView">Time to focus</span>
+          <button class="btn" id="btnResetCycle" type="button" style="margin-left:10px; padding:6px 10px; font-size:12px;">Reset</button>
+        </div>
+      </div>
+
+      <div class="card" id="tasksCard">
+        <h2>Tasks</h2>
+        <div class="row" style="align-items:stretch;">
+          <div style="flex:1; min-width:240px;">
+            <input id="taskName" placeholder="Например: Написать отчет" />
+          </div>
+          <button class="btn" id="btnAddTask" type="button" style="min-width:120px;">Add Task</button>
+        </div>
+        <div class="tasks" id="tasks"></div>
+        <div class="small" id="tasksHint" style="margin-top:10px; display:none;">
+          Чтобы работать с задачами, запусти таймер без авторизации (создастся гость) или выполни вход.
+        </div>
+      </div>
+
+      <div class="card" id="reportCard">
+        <h2>Report</h2>
+
+        <div class="row" style="justify-content:space-between; gap:12px;">
+          <div class="btn" style="cursor:default; font-weight:950;">Streak <strong id="streak">—</strong></div>
+          <div class="btn" style="cursor:default; font-weight:950;">Today focus <strong id="todayFocus">—</strong></div>
+        </div>
+
+        <div class="reportList" id="reportActions"></div>
+        <pre id="debugOut"></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="modalBg" id="modalAuthBg">
+    <div class="modal">
+      <h3>Log in</h3>
+      <label>Email</label>
+      <input id="email" type="email" value="new@example.com" />
+      <label>Password</label>
+      <input id="password" type="password" value="123456" />
+      <div class="actions">
+        <button class="btn" id="btnRegister" type="button">Register</button>
+        <button class="btn" id="btnLogin" type="button">Login</button>
+        <button class="btn" id="btnCloseAuth" type="button">Close</button>
+      </div>
+      <div class="small" style="margin-top:10px;">
+        Гость создаётся автоматически только при первом запуске таймера без авторизации.
+      </div>
+    </div>
+  </div>
+
+  <div class="modalBg" id="modalLogoutBg">
+    <div class="modal">
+      <h3>Вы уверены, что хотите выйти?</h3>
+      <div class="small">Таймер будет остановлен, токен будет удалён из браузера.</div>
+      <div class="actions">
+        <button class="btn" id="btnLogoutNo" type="button">Нет</button>
+        <button class="btn" id="btnLogoutYes" type="button">Да</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modalBg" id="modalSettingsBg">
+    <div class="modal">
+      <h3>Settings</h3>
+      <div class="row">
+        <div style="flex:1;">
+          <label>Work (min)</label>
+          <input id="workMinutes" type="number" min="1" max="240" value="25" />
+        </div>
+        <div style="flex:1;">
+          <label>Short break (min)</label>
+          <input id="shortBreakMinutes" type="number" min="1" max="120" value="5" />
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1;">
+          <label>Long break (min)</label>
+          <input id="longBreakMinutes" type="number" min="1" max="240" value="15" />
+        </div>
+        <div style="flex:1;">
+          <label>Long break every</label>
+          <input id="longBreakEvery" type="number" min="2" max="12" value="4" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btnSettingsSave" type="button">Save</button>
+        <button class="btn" id="btnCloseSettings" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <div class="tTitle" id="toastTitle">Сообщение</div>
+    <div class="tBody" id="toastBody">—</div>
+    <div class="tRow" id="toastRow"></div>
+  </div>
+
+  <script type="module" src="/src/js/app.js"></script>
+</body>
+</html>
