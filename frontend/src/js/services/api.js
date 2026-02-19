@@ -8,6 +8,10 @@ export function getApiBase() {
 
 export async function api(path, { method = 'GET', body = null, headers = {} } = {}) {
   const h = { ...headers };
+
+  const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
+  if (token) h['Authorization'] = `Bearer ${token}`;
+
   if (body !== null) h['Content-Type'] = 'application/json';
 
   const res = await fetch(API_BASE + path, {
