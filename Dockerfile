@@ -25,11 +25,7 @@ RUN pip install --no-cache-dir \
 # код
 COPY backend/src /app/backend/src
 COPY backend/migrations /app/backend/migrations
-# если у тебя есть alembic.ini в backend — тоже копируем (если файла нет, команда не упадёт при билде,
-# но лучше чтобы файл реально существовал в репо)
-COPY backend/alembic.ini /app/backend/alembic.ini
-
-# фронтенд, который backend раздаёт статикой
+�й
 COPY frontend /app/frontend
 
 COPY start.sh /app/start.sh
