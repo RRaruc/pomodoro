@@ -6,7 +6,6 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app/backend/src
 
-# deps (повторяем подход твоего backend/Dockerfile)
 COPY backend/pyproject.toml /app/backend/pyproject.toml
 
 RUN pip install --no-cache-dir \
@@ -22,10 +21,10 @@ RUN pip install --no-cache-dir \
     "passlib[bcrypt]>=1.7" \
     "bcrypt<4.0"
 
-# код
+
 COPY backend/src /app/backend/src
 COPY backend/migrations /app/backend/migrations
-�й
+
 COPY frontend /app/frontend
 
 COPY start.sh /app/start.sh
