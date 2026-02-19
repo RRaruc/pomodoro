@@ -21,14 +21,11 @@ RUN pip install --no-cache-dir \
     "passlib[bcrypt]>=1.7" \
     "bcrypt<4.0"
 
-
 COPY backend/src /app/backend/src
 COPY backend/migrations /app/backend/migrations
-
 COPY frontend /app/frontend
-
 COPY start.sh /app/start.sh
+
 RUN chmod +x /app/start.sh
 
-EXPOSE 8000
 CMD ["/app/start.sh"]

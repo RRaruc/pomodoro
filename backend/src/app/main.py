@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -12,10 +12,11 @@ from app.api.v1.analytics import router as analytics_router
 from app.api.v1.sessions import router as sessions_router
 from app.api.v1.settings import router as settings_router
 from app.api.v1.tasks import router as tasks_router
-from app.db.session import SessionLocal
+from app.db.session import SessionLocal, init_db
 
 app = FastAPI(title="Pomodoro API", version="0.6.1")
 
+# В проде фронт и API на одном домене, но для надёжности оставляем permissive CORS без credentials.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,21 +28,25 @@ app.add_middleware(
 REQUESTS = Counter("http_requests_total", "Total HTTP requests", ["path", "method"])
 
 
+@app.on_event("startup")
+def _startup():
+    # Гарантируем, что таблицы существуют
+    init_db()
+
+
 @app.middleware("http")
-async def count_requests(request: Request, call_next):
+async def count_requests(request, call_next):
     response = await call_next(request)
     REQUESTS.labels(path=request.url.path, method=request.method).inc()
     return response
 
 
 @app.get("/health", include_in_schema=False)
-@app.head("/health", include_in_schema=False)
 def health():
     return {"status": "ok"}
 
 
 @app.get("/ready", include_in_schema=False)
-@app.head("/ready", include_in_schema=False)
 def ready():
     try:
         with SessionLocal() as db:
@@ -56,6 +61,7 @@ def metrics():
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
+# ----- API routers -----
 app.include_router(auth_router, prefix="/v1")
 app.include_router(sessions_router, prefix="/v1")
 app.include_router(analytics_router, prefix="/v1")
@@ -63,8 +69,18 @@ app.include_router(settings_router, prefix="/v1")
 app.include_router(tasks_router, prefix="/v1")
 
 
-# В Docker-образе Render фронтенд кладётся сюда:
-FRONTEND_DIR = Path("/app/frontend")
+# ----- Frontend static -----
+def _find_repo_root() -> Path:
+    here = Path(__file__).resolve()
+    for p in here.parents:
+        if (p / "frontend").exists():
+            return p
+    # fallback: ожидаем структуру /app/backend/src/app/main.py
+    return here.parents[4]
+
+
+REPO_ROOT = _find_repo_root()
+FRONTEND_DIR = REPO_ROOT / "frontend"
 FRONTEND_INDEX = FRONTEND_DIR / "index.html"
 FRONTEND_SRC_DIR = FRONTEND_DIR / "src"
 
@@ -78,14 +94,14 @@ def _serve_index():
     return Response(content="frontend/index.html not found", media_type="text/plain; charset=utf-8", status_code=404)
 
 
-@app.get("/", include_in_schema=False)
-@app.head("/", include_in_schema=False)
+# Render иногда делает HEAD /
+@app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
 def frontend_root():
     return _serve_index()
 
 
+# SPA fallback (чтобы прямые переходы по URL работали)
 @app.get("/{full_path:path}", include_in_schema=False)
-@app.head("/{full_path:path}", include_in_schema=False)
 def frontend_spa_fallback(full_path: str):
     top = (full_path.split("/", 1)[0] or "").lower()
     if top in {"v1", "metrics", "health", "ready", "src"}:
