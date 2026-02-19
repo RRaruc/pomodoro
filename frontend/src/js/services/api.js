@@ -1,11 +1,14 @@
-const API_BASE = 'http://localhost:8000';
+const API_BASE = (typeof window !== 'undefined' && window.__API_BASE__ !== undefined)
+  ? String(window.__API_BASE__ || '')
+  : '';
 
-export async function api(path, { method='GET', body=null, headers={} } = {}){
+export function getApiBase() {
+  return API_BASE;
+}
+
+export async function api(path, { method = 'GET', body = null, headers = {} } = {}) {
   const h = { ...headers };
   if (body !== null) h['Content-Type'] = 'application/json';
-
-  const token = localStorage.getItem('token');
-  if (token) h['Authorization'] = 'Bearer ' + token;
 
   const res = await fetch(API_BASE + path, {
     method,
